@@ -14,7 +14,7 @@
 ; 4.5.1.3 -> good
 ; 4.5.1.3.2 -> bad
 ; 4.5.0beta -> bad
-!define /ifndef QBT_VERSION "5.2.4"
+!define /ifndef QBT_VERSION "5.2.4.10"
 
 ; Option that controls the installer's window name
 ; If set, its value will be used like this:
@@ -38,12 +38,23 @@
 ; QBT_CPU_ARCH (x64 or arm64)
 !define /ifndef QBT_CPU_ARCH "x64"
 
-!ifndef QBT_INSTALLER_WINDOWNAME | QBT_INSTALLER_FILENAME
-  ; The name of the installer
-  !define QBT_INSTALLER_WINDOWNAME "${QBT_VERSION} ${QBT_CPU_ARCH}"
+; Libtorrent Experimental
+;!define LT_EXP_BUILD "LT2.1"
 
-  ; The file to write
-  !define QBT_INSTALLER_FILENAME "${QBT_VERSION}_${QBT_CPU_ARCH}"
+!ifndef QBT_INSTALLER_WINDOWNAME | QBT_INSTALLER_FILENAME
+  !ifdef LT_EXP_BUILD
+    ; The name of the installer
+    !define QBT_INSTALLER_WINDOWNAME "${QBT_VERSION} ${QBT_CPU_ARCH} ${LT_EXP_BUILD}"
+
+    ; The file to write
+    !define QBT_INSTALLER_FILENAME "${QBT_VERSION}_${QBT_CPU_ARCH}_${LT_EXP_BUILD}"
+  !else
+    ; The name of the installer
+    !define QBT_INSTALLER_WINDOWNAME "${QBT_VERSION} ${QBT_CPU_ARCH} "
+
+    ; The file to write
+    !define QBT_INSTALLER_FILENAME "${QBT_VERSION}_${QBT_CPU_ARCH}"
+  !endif
 !endif
 
 !define /ifndef QBT_DIST_DIR "qBittorrent"
@@ -82,16 +93,16 @@ SetCompressorDictSize 64
 !define MUI_FINISHPAGE_RUN_TEXT $(launch_qbt)
 
 ; The name of the installer
-Name "qBittorrent ${QBT_INSTALLER_WINDOWNAME}"
+Name "qBittorrent Enhanced ${QBT_INSTALLER_WINDOWNAME}"
 
 ; The file to write
-OutFile "qbittorrent_${QBT_INSTALLER_FILENAME}_setup.exe"
+OutFile "qbittorrent_enhanced_${QBT_INSTALLER_FILENAME}_setup.exe"
 
 ;Installer Version Information
-VIAddVersionKey "ProductName" "qBittorrent"
-VIAddVersionKey "CompanyName" "The qBittorrent project"
+VIAddVersionKey "ProductName" "qBittorrent Enhanced"
+VIAddVersionKey "CompanyName" "The qBittorrent Enhanced project"
 VIAddVersionKey "LegalCopyright" "Copyright ©2006-2026 The qBittorrent project"
-VIAddVersionKey "FileDescription" "qBittorrent - A Bittorrent Client"
+VIAddVersionKey "FileDescription" "qBittorrent Enhanced - A Enhanced Bittorrent Client"
 VIAddVersionKey "FileVersion" "${QBT_VERSION}"
 
 ; VIProductVersion needs a 4 part version.

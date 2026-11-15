@@ -29,6 +29,8 @@
 
 #pragma once
 
+#include <libtorrent/version.hpp>
+
 #include <QtContainerFwd>
 #include <QObject>
 
@@ -94,7 +96,10 @@ namespace BitTorrent
             Default = 0,
             MMap = 1,
             Posix = 2,
-            SimplePreadPwrite = 3
+            SimplePreadPwrite = 3,
+#if LIBTORRENT_VERSION_NUM >= 20100
+            PreadPwrite = 4,
+#endif
         };
         Q_ENUM_NS(DiskIOType)
 
@@ -245,6 +250,20 @@ namespace BitTorrent
         virtual QString additionalTrackersURL() const = 0;
         virtual void setAdditionalTrackersURL(const QString &url) = 0;
         virtual QString additionalTrackersFromURL() const = 0;
+
+        // Auto ban Unknown Peer
+        virtual bool isAutoBanUnknownPeerEnabled() const = 0;
+        virtual void setAutoBanUnknownPeer(bool value) = 0;
+
+        // Auto ban Bittorrent Media Player Peer
+        virtual bool isAutoBanBTPlayerPeerEnabled() const = 0;
+        virtual void setAutoBanBTPlayerPeer(bool value) = 0;
+
+        // Shadowban IP
+        virtual bool isShadowBanEnabled() const = 0;
+        virtual void setShadowBan(bool value) = 0;
+        virtual QStringList shadowBannedIPs() const = 0;
+        virtual void setShadowBannedIPs(const QStringList &newList) = 0;
 
         virtual int globalDownloadSpeedLimit() const = 0;
         virtual void setGlobalDownloadSpeedLimit(int limit) = 0;
@@ -469,6 +488,7 @@ namespace BitTorrent
         virtual bool isListening() const = 0;
 
         virtual void banIP(const QString &ip) = 0;
+        virtual void shadowbanIP(const QString &ip) = 0;
 
         virtual bool isKnownTorrent(const InfoHash &infoHash) const = 0;
         virtual bool addTorrent(const TorrentDescriptor &torrentDescr, const AddTorrentParams &params = {}) = 0;

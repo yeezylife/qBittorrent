@@ -36,6 +36,8 @@
 #include <QLabel>
 #include <QNetworkInterface>
 
+#include <libtorrent/version.hpp>
+
 #include "base/bittorrent/session.h"
 #include "base/global.h"
 #include "base/preferences.h"
@@ -80,6 +82,8 @@ namespace
         TORRENT_FILE_SIZE_LIMIT,
         CONFIRM_RECHECK_TORRENT,
         RECHECK_COMPLETED,
+        CONFIRM_AUTO_BAN_UNKNOWN_PEER,
+        CONFIRM_AUTO_BAN_BT_Player,
         // UI related
         APP_INSTANCE_NAME,
         LIST_REFRESH,
@@ -319,6 +323,10 @@ void AdvancedSettings::saveAdvancedSettings() const
     session->setMaxConcurrentHTTPAnnounces(m_spinBoxMaxConcurrentHTTPAnnounces.value());
     // Stop tracker timeout
     session->setStopTrackerTimeout(m_spinBoxStopTrackerTimeout.value());
+    // Auto ban Unknown Peer
+    session->setAutoBanUnknownPeer(m_autoBanUnknownPeer.isChecked());
+    // Auto ban Bittorrent Media Player Peer
+    session->setAutoBanBTPlayerPeer(m_autoBanBTPlayerPeer.isChecked());
     // Program notification
     app()->desktopIntegration()->setNotificationsEnabled(m_checkBoxProgramNotifications.isChecked());
 #ifdef QBT_USES_DBUS
@@ -599,6 +607,9 @@ void AdvancedSettings::loadAdvancedSettings()
     m_comboBoxDiskIOType.addItem(tr("Memory mapped files"), QVariant::fromValue(BitTorrent::DiskIOType::MMap));
     m_comboBoxDiskIOType.addItem(tr("POSIX-compliant"), QVariant::fromValue(BitTorrent::DiskIOType::Posix));
     m_comboBoxDiskIOType.addItem(tr("Simple pread/pwrite"), QVariant::fromValue(BitTorrent::DiskIOType::SimplePreadPwrite));
+#if LIBTORRENT_VERSION_NUM >= 20100
+    m_comboBoxDiskIOType.addItem(tr("Pread/Pwrite"), QVariant::fromValue(BitTorrent::DiskIOType::PreadPwrite));
+#endif
     m_comboBoxDiskIOType.setCurrentIndex(m_comboBoxDiskIOType.findData(QVariant::fromValue(session->diskIOType())));
     addRow(DISK_IO_TYPE, tr("Disk IO type (requires restart)") + u' ' + makeLink(u"https://www.libtorrent.org/single-page-ref.html#default-disk-io-constructor", u"(?)")
            , &m_comboBoxDiskIOType);
@@ -822,6 +833,12 @@ void AdvancedSettings::loadAdvancedSettings()
     addRow(ANNOUNCE_PORT, (tr("Port reported to trackers (requires restart) [0: listening port]")
         + u' ' + makeLink(u"https://www.libtorrent.org/reference-Settings.html#announce_port", u"(?)"))
         , &m_spinBoxAnnouncePort);
+    // Auto Ban Unknown Peer from China
+    m_autoBanUnknownPeer.setChecked(session->isAutoBanUnknownPeerEnabled());
+    addRow(CONFIRM_AUTO_BAN_UNKNOWN_PEER, tr("Auto Ban Unknown Peer from China"), &m_autoBanUnknownPeer);
+    // Auto Ban Bittorrent Media Player Peer
+    m_autoBanBTPlayerPeer.setChecked(session->isAutoBanBTPlayerPeerEnabled());
+    addRow(CONFIRM_AUTO_BAN_BT_Player, tr("Auto Ban Bittorrent Media Player Peer"), &m_autoBanBTPlayerPeer);
     // Max concurrent HTTP announces
     m_spinBoxMaxConcurrentHTTPAnnounces.setMaximum(std::numeric_limits<int>::max());
     m_spinBoxMaxConcurrentHTTPAnnounces.setValue(session->maxConcurrentHTTPAnnounces());
